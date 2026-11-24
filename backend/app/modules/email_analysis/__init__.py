@@ -1,0 +1,3 @@
+"""
+Email analysis module.
+"""

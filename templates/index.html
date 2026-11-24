@@ -1,0 +1,470 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>PhishTrace AI — Explainable Phishing URL Investigation Platform</title>
+  <meta name="description" content="An explainable multi-signal framework for early detection and investigation of phishing URLs combining lexical analysis, brand detection, ML, VirusTotal, and threat relationship graphs.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/static/css/style.css">
+  <link rel="stylesheet" href="/static/css/graph.css">
+</head>
+<body>
+  <div class="app-shell">
+    <!-- Platform Header -->
+    <header class="app-header">
+      <div class="app-header__brand">
+        <span class="app-header__mark" aria-hidden="true"></span>
+        <div>
+          <h1>PhishTrace AI</h1>
+          <p>Explainable multi-signal phishing URL investigation & threat graph</p>
+        </div>
+      </div>
+      <span class="app-header__status">
+        <span class="app-header__status-dot" aria-hidden="true"></span>
+        Flask Core Engine · Full Stack Active
+      </span>
+    </header>
+
+    <!-- Main Content -->
+    <main class="app-main">
+      <!-- Search Form -->
+      <form id="scan-form" class="scan-form">
+        <label for="url-input" class="scan-form__label">Enter a URL to investigate</label>
+        <div class="scan-form__row">
+          <select id="investigation-type" style="padding: 12px; border-radius: 8px; border: 1px solid #3c4b5c; background: #0d1117; color: #c9d1d9; font-weight: 500; font-family: 'Inter', sans-serif;">
+            <option value="url">URL Search</option>
+            <option value="email_id">@ Email ID Investigation</option>
+            <option value="email">Email File Upload (.eml)</option>
+            <option value="file">Generic File Scan</option>
+          </select>
+          <input
+            id="url-input"
+            type="text"
+            placeholder="e.g. paypa1-login-security.com/verify"
+            autocomplete="off"
+            spellcheck="false"
+            required
+          />
+          <input 
+            id="file-input" 
+            type="file" 
+            style="display: none; padding: 12px; background: #0d1117; color: #c9d1d9; border: 1px solid #3c4b5c; border-radius: 8px; flex-grow: 1;" 
+          />
+          <button id="scan-button" type="submit">Investigate</button>
+        </div>
+
+        <div class="scan-form__samples" id="scan-form-samples">
+          <span class="scan-form__samples-label">Quick Test:</span>
+          <button type="button" class="sample-pill" data-type="url" data-val="paypa1-security-update.com/signin?verify=1">PayPal Phish</button>
+          <button type="button" class="sample-pill" data-type="url" data-val="netflix-billing-verify.org/login">Netflix Billing</button>
+          <button type="button" class="sample-pill" data-type="url" data-val="198.51.100.24/auth/account">IP Host</button>
+          <button type="button" class="sample-pill" data-type="url" data-val="https://google.com">Legitimate</button>
+        </div>
+      </form>
+
+      <!-- Alert Box -->
+      <div id="error-alert" class="app-alert" style="display: none;" role="alert"></div>
+
+      <!-- Navigation Tabs -->
+      <nav class="results-nav" aria-label="Investigation Tabs">
+        <button type="button" class="nav-tab-btn active" data-tab="overview">
+          Overview & Risk
+        </button>
+        <button type="button" class="nav-tab-btn" data-tab="file" id="tab-btn-file">
+          Email &amp; File Forensics
+        </button>
+        <button type="button" class="nav-tab-btn" data-tab="graph" id="tab-btn-graph">
+          Threat Relationship Graph
+          <span id="tab-graph-badge" class="nav-tab-badge" style="display: none;">0</span>
+        </button>
+        <button type="button" class="nav-tab-btn" data-tab="adversarial">
+          Adversarial Testing
+        </button>
+        <button type="button" class="nav-tab-btn" data-tab="features" id="tab-btn-features">
+          Forensic Features
+        </button>
+        <button type="button" class="nav-tab-btn" data-tab="history">
+          Audit History
+        </button>
+      </nav>
+
+      <!-- TAB 1: OVERVIEW & RISK -->
+      <section id="tab-content-overview" class="tab-pane active">
+        <div id="results-view" style="display: none;" class="results">
+          <!-- Summary Banner Card -->
+          <div class="results__summary card">
+            <div class="risk-gauge-box">
+              <div id="gauge-container" class="risk-gauge">
+                <svg viewBox="0 0 120 70" class="risk-gauge__svg">
+                  <path d="M 15 60 A 45 45 0 0 1 105 60" fill="none" stroke="#232b32" stroke-width="10" stroke-linecap="round"/>
+                  <path id="gauge-arc" d="M 15 60 A 45 45 0 0 1 105 60" fill="none" stroke="var(--signal-cyan)" stroke-width="10" stroke-linecap="round" stroke-dasharray="141.37" stroke-dashoffset="141.37"/>
+                </svg>
+                <div class="risk-gauge__text">
+                  <span id="risk-score-value" class="risk-gauge__score">0</span>
+                  <span class="risk-gauge__scale">/ 100</span>
+                </div>
+              </div>
+              <span id="risk-class-badge" class="risk-classification-tag">LOW RISK</span>
+            </div>
+
+            <div class="results__summary-body">
+              <div class="url-header-row">
+                <p id="normalized-url-display" class="results__url font-mono"></p>
+                <button type="button" id="export-report-btn" class="report-export-btn">
+                  Export Forensic Report ↗
+                </button>
+              </div>
+
+              <div class="confidence-row">
+                <span class="confidence-row__label">Confidence</span>
+                <div class="confidence-row__track">
+                  <div id="confidence-fill" class="confidence-row__fill" style="width: 0%;"></div>
+                </div>
+                <span id="confidence-value" class="confidence-row__value font-mono">0%</span>
+              </div>
+
+              <p id="reputation-gap-alert" class="reputation-gap-note" style="display: none;">
+                Low-reputation early warning: VirusTotal shows 0 or minimal detection, but independent signals identify significant phishing indicators.
+              </p>
+
+              <h3 class="results__reasons-title">Risk-Increasing Factors</h3>
+              <ul id="reasons-up-list" class="results__reasons results__reasons--up"></ul>
+
+              <div id="reasons-down-container" style="display: none;">
+                <h3 class="results__reasons-title">Risk-Reducing Factors</h3>
+                <ul id="reasons-down-list" class="results__reasons results__reasons--down"></ul>
+              </div>
+            </div>
+          </div>
+
+          <!-- Grid: Signals + Evidence -->
+          <div class="results__grid">
+            <div class="card">
+              <h3 class="panel-card-title">Multi-Signal Attribution</h3>
+              <div id="signals-container" class="signals-list"></div>
+            </div>
+            <div class="card">
+              <h3 class="panel-card-title">Lexical Evidence</h3>
+              <dl id="features-summary-list" class="evidence-grid"></dl>
+            </div>
+          </div>
+
+          <!-- Grid: Mini Cards -->
+          <div class="results__grid">
+            <div class="card evidence-mini">
+              <h3 class="evidence-panel__title">Brand Impersonation</h3>
+              <div id="brand-mini-content"></div>
+            </div>
+            <div class="card evidence-mini">
+              <h3 class="evidence-panel__title">Reputation (VirusTotal)</h3>
+              <div id="vt-mini-content"></div>
+            </div>
+            <div class="card evidence-mini">
+              <h3 class="evidence-panel__title">Machine Learning Classifier</h3>
+              <div id="ml-mini-content"></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Empty State -->
+        <div id="overview-empty" class="empty-state">
+          <p>No investigation active. Submit a URL, upload an Email (.eml), or scan a generic file above to see the risk breakdown.</p>
+        </div>
+      </section>
+
+      <!-- TAB 6: EMAIL & FILE RESULTS -->
+      <section id="tab-content-file" class="tab-pane">
+        <div class="card forensics-panel">
+          <div class="forensics-header">
+            <div>
+              <div class="forensics-title-row">
+                <h3 class="panel-card-title" style="margin: 0;">Email &amp; File Forensic Investigation</h3>
+                <span class="forensics-badge">Phase 6 Forensics</span>
+              </div>
+              <p class="forensics-subtitle">
+                Deep-inspect suspicious Email IDs (addresses), dissect RFC .eml messages for spoofing &amp; malicious payloads, or verify file integrity.
+              </p>
+            </div>
+            <div class="forensics-mode-selector">
+              <button type="button" class="forensics-mode-btn active" data-mode="email_id">@ Email ID</button>
+              <button type="button" class="forensics-mode-btn" data-mode="email_file">✉ Email File (.eml)</button>
+              <button type="button" class="forensics-mode-btn" data-mode="file_hash">📄 Generic File</button>
+            </div>
+          </div>
+
+          <!-- SUB-MODE 1: Email ID Investigator -->
+          <div id="subpane-email-id" class="forensics-subpane">
+            <div class="forensics-form-box">
+              <label for="tab-email-input" class="forensics-label">Investigate Email Address / ID</label>
+              <div class="forensics-input-row">
+                <input
+                  id="tab-email-input"
+                  type="text"
+                  class="forensics-input"
+                  placeholder="e.g. security@paypa1-login.com or victim@mailinator.com"
+                  autocomplete="off"
+                  spellcheck="false"
+                />
+                <button type="button" id="tab-email-btn" class="forensics-submit-btn">Investigate Email ID</button>
+              </div>
+              <div class="forensics-samples">
+                <span class="forensics-samples-label">Quick Test:</span>
+                <button type="button" class="forensics-sample-pill" data-email="security@paypa1-login.com">PayPal Spoof</button>
+                <button type="button" class="forensics-sample-pill" data-email="victim@mailinator.com">Disposable Mail</button>
+                <button type="button" class="forensics-sample-pill" data-email="admin123456@tempmail.com">Auto-Generated</button>
+                <button type="button" class="forensics-sample-pill" data-email="john.doe@gmail.com">Legitimate Gmail</button>
+              </div>
+            </div>
+            <div id="email-id-results" style="display: none;" class="forensics-results-wrap"></div>
+          </div>
+
+          <!-- SUB-MODE 2: Email File (.eml) Upload -->
+          <div id="subpane-email-file" class="forensics-subpane" style="display: none;">
+            <div class="forensics-form-box">
+              <label class="forensics-label">Upload .eml Message File for Forensic Dissection</label>
+              <div class="forensics-upload-row">
+                <input id="tab-eml-file" type="file" accept=".eml" class="forensics-file-picker" />
+                <button type="button" id="tab-eml-btn" class="forensics-submit-btn">Upload &amp; Analyze Message</button>
+              </div>
+              <p class="forensics-hint">Parses headers, authenticates SPF/DKIM/DMARC, investigates sender Email ID, extracts links, and checks attachments.</p>
+            </div>
+            <div id="email-file-results" style="display: none;" class="forensics-results-wrap"></div>
+          </div>
+
+          <!-- SUB-MODE 3: Generic File Hash Scan -->
+          <div id="subpane-file-hash" class="forensics-subpane" style="display: none;">
+            <div class="forensics-form-box">
+              <label class="forensics-label">Upload Generic File for Cryptographic Hashing</label>
+              <div class="forensics-upload-row">
+                <input id="tab-generic-file" type="file" class="forensics-file-picker" />
+                <button type="button" id="tab-generic-btn" class="forensics-submit-btn">Compute Hashes</button>
+              </div>
+              <p class="forensics-hint">Computes SHA-256, SHA-1, and MD5 hashes safely without executing file contents.</p>
+            </div>
+            <div id="generic-file-results" style="display: none;" class="forensics-results-wrap"></div>
+          </div>
+
+          <!-- Legacy fallback container if needed -->
+          <div id="file-results-container" style="display: none;">
+            <h3 class="panel-card-title" id="file-results-title">File / Email Analysis</h3>
+            <div id="file-results-body"></div>
+          </div>
+
+        </div>
+      </section>
+
+      <!-- TAB 2: THREAT RELATIONSHIP GRAPH -->
+      <section id="tab-content-graph" class="tab-pane">
+        <div class="threat-graph-wrapper card">
+          <div class="threat-graph__header">
+            <div>
+              <div class="threat-graph__title-row">
+                <h3 class="threat-graph__title">Threat Relationship Graph</h3>
+                <span class="threat-graph__badge">Phase 4 Infrastructure Correlation</span>
+              </div>
+              <p class="threat-graph__subtitle">
+                Interactive topology of destination URL, apex domain, authoritative nameservers, resolved IPs, and targeted brand identities.
+              </p>
+            </div>
+
+            <div class="threat-graph__controls">
+              <div class="threat-graph__filter-group">
+                <button type="button" class="filter-btn active" data-filter="all">All</button>
+                <button type="button" class="filter-btn" data-filter="threats">Threats</button>
+                <button type="button" class="filter-btn" data-filter="infra">Infra</button>
+              </div>
+              <div class="threat-graph__zoom-group">
+                <button type="button" id="zoom-in-btn" class="zoom-btn" title="Zoom In">+</button>
+                <button type="button" id="zoom-out-btn" class="zoom-btn" title="Zoom Out">−</button>
+                <button type="button" id="zoom-reset-btn" class="zoom-btn reset-btn" title="Reset View">Reset</button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Telemetry Ribbon -->
+          <div class="threat-graph__telemetry-bar">
+            <div class="telemetry-item">
+              <span class="telemetry-label">Apex Domain</span>
+              <span id="telemetry-domain" class="telemetry-value font-mono">—</span>
+            </div>
+            <div class="telemetry-item">
+              <span class="telemetry-label">Domain Age</span>
+              <span id="telemetry-age" class="telemetry-value">—</span>
+            </div>
+            <div class="telemetry-item">
+              <span class="telemetry-label">Resolved IPs</span>
+              <span id="telemetry-ips" class="telemetry-value font-mono">0</span>
+            </div>
+            <div class="telemetry-item">
+              <span class="telemetry-label">SSRF Protection</span>
+              <span id="telemetry-ssrf" class="telemetry-value text-safe">PASSED</span>
+            </div>
+          </div>
+
+          <!-- Threat Indicators Box -->
+          <div id="threat-indicators-box" class="threat-indicators-box" style="display: none;">
+            <div class="threat-indicators-title">Infrastructure Threat Indicators</div>
+            <ul id="threat-indicators-list" class="threat-indicators-list"></ul>
+          </div>
+
+          <!-- Viewport: SVG Canvas + Inspector -->
+          <div class="threat-graph__viewport-grid">
+            <div id="graph-canvas-container" class="threat-graph__canvas-container">
+              <svg id="threat-svg" class="threat-graph__svg" viewBox="0 0 760 480" preserveAspectRatio="xMidYMid meet">
+                <defs>
+                  <marker id="arrowhead" markerWidth="8" markerHeight="6" refX="20" refY="3" orient="auto">
+                    <polygon points="0 0, 8 3, 0 6" fill="#64748b"/>
+                  </marker>
+                  <marker id="arrowhead-threat" markerWidth="8" markerHeight="6" refX="20" refY="3" orient="auto">
+                    <polygon points="0 0, 8 3, 0 6" fill="#fb7185"/>
+                  </marker>
+                  <filter id="node-glow" x="-50%" y="-50%" width="200%" height="200%">
+                    <feGaussianBlur stdDeviation="6" result="blur" />
+                    <feComposite in="SourceGraphic" in2="blur" operator="over" />
+                  </filter>
+                </defs>
+                <g id="svg-world"></g>
+              </svg>
+            </div>
+
+            <!-- Forensic Entity Inspector -->
+            <div class="threat-inspector-panel">
+              <div class="inspector-header">
+                <h4>Entity Inspector</h4>
+                <span id="inspector-risk-tag" class="risk-tag">SELECT NODE</span>
+              </div>
+              <div id="inspector-body" class="inspector-body">
+                <div class="inspector-empty">Select any graph node to inspect forensic attributes.</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- TAB 3: ADVERSARIAL TESTING -->
+      <section id="tab-content-adversarial" class="tab-pane">
+        <div class="adversarial-panel card">
+          <div class="adversarial-panel__header">
+            <div>
+              <div class="adversarial-title-row">
+                <h3 class="adversarial-panel__title">Adversarial URL Mutation Testing</h3>
+                <span class="adversarial-badge">Phase 5 Evasion Simulation</span>
+              </div>
+              <p class="adversarial-panel__subtitle">
+                Simulates real-world attacker evasion techniques (homoglyphs, typosquatting, subdomain masquerading, userinfo masking) to benchmark engine detection resilience.
+              </p>
+            </div>
+            <button type="button" id="run-adversarial-btn" class="run-test-btn">
+              Run Evasion Test Suite
+            </button>
+          </div>
+
+          <div id="adversarial-loading" style="display: none; text-align: center; padding: 30px;">
+            Simulating adversarial mutations across detection pipelines…
+          </div>
+
+          <div id="adversarial-results" style="display: none;">
+            <div class="resilience-summary-card">
+              <div class="resilience-score-box">
+                <span id="resilience-rate-display" class="resilience-score-val">0%</span>
+                <span class="resilience-score-label">Engine Resilience</span>
+              </div>
+              <div class="resilience-stats-grid">
+                <div class="stat-pill">
+                  <span id="mutations-flagged-count" class="stat-num text-safe">0</span>
+                  <span class="stat-desc">Mutations Flagged</span>
+                </div>
+                <div class="stat-pill">
+                  <span id="mutations-evaded-count" class="stat-num text-danger">0</span>
+                  <span class="stat-desc">Evasion Blind Spots</span>
+                </div>
+                <div class="stat-pill">
+                  <span id="mutations-total-count" class="stat-num">0</span>
+                  <span class="stat-desc">Variants Tested</span>
+                </div>
+                <div class="stat-pill">
+                  <span id="baseline-score-display" class="stat-num font-mono">0</span>
+                  <span class="stat-desc">Baseline Risk Score</span>
+                </div>
+              </div>
+            </div>
+
+            <div id="adversarial-vulnerabilities-box" class="vulnerability-box">
+              <h4 class="vulnerability-title">Security Resilience Findings</h4>
+              <ul id="vulnerabilities-list" class="vulnerability-list"></ul>
+            </div>
+
+            <div class="mutations-list">
+              <h4 class="mutations-header">Evaluated Evasion Variants</h4>
+              <div id="mutations-container"></div>
+            </div>
+          </div>
+
+          <div id="adversarial-empty" class="adversarial-empty">
+            <p>Click <strong>"Run Evasion Test Suite"</strong> to generate 8 adversarial variants of the target URL and benchmark detection resilience.</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- TAB 4: FORENSIC FEATURES -->
+      <section id="tab-content-features" class="tab-pane">
+        <div class="card">
+          <h3 class="panel-card-title">Comprehensive Forensic Lexical Features</h3>
+          <p style="font-size: 0.82rem; color: var(--text-secondary); margin-bottom: 20px;">
+            Extracted syntactic, structural, and lexical URL vector attributes used by the multi-signal scoring model.
+          </p>
+          <dl id="features-full-grid" class="evidence-grid"></dl>
+        </div>
+      </section>
+
+      <!-- TAB 5: AUDIT HISTORY -->
+      <section id="tab-content-history" class="tab-pane">
+        <div class="scan-history card">
+          <div class="scan-history__header">
+            <div>
+              <div class="history-title-row">
+                <h3 class="scan-history__title">Investigation History & Reports</h3>
+                <span id="history-count-badge" class="history-count-badge">0 Saved Scans</span>
+              </div>
+              <p class="scan-history__subtitle">
+                Persistent audit trail of previously analyzed URLs. Inspect any scan to load its multi-signal graph or export a certified forensic incident report.
+              </p>
+            </div>
+            <div class="history-actions">
+              <button type="button" id="refresh-history-btn" class="refresh-btn">Refresh</button>
+              <button type="button" id="clear-history-btn" class="clear-btn">Clear History</button>
+            </div>
+          </div>
+
+          <div id="history-table-wrapper" class="history-table-container" style="display: none;">
+            <table class="history-table">
+              <thead>
+                <tr>
+                  <th>Verdict</th>
+                  <th>Target URL</th>
+                  <th>Brand Target</th>
+                  <th>Domain Age</th>
+                  <th>Timestamp (UTC)</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody id="history-table-body"></tbody>
+            </table>
+          </div>
+
+          <div id="history-empty" class="history-empty">
+            <p>No scans recorded yet. Submit a URL to start building an investigation history.</p>
+          </div>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <!-- JavaScript Modules -->
+  <script src="/static/js/threat_graph.js"></script>
+  <script src="/static/js/app.js"></script>
+</body>
+</html>

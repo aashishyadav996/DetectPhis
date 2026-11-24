@@ -1,0 +1,277 @@
+.adversarial-panel {
+  margin-top: 10px;
+  background: var(--bg-panel);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 24px;
+}
+
+.adversarial-panel__header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  flex-wrap: wrap;
+  gap: 16px;
+  margin-bottom: 24px;
+}
+
+.adversarial-title-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.adversarial-panel__title {
+  font-size: 1.1rem;
+  margin: 0;
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+.adversarial-badge {
+  font-family: var(--font-mono);
+  font-size: 0.68rem;
+  color: #c084fc;
+  background: rgba(192, 132, 252, 0.12);
+  border: 1px solid rgba(192, 132, 252, 0.35);
+  padding: 3px 8px;
+  border-radius: 999px;
+  font-weight: 500;
+}
+
+.adversarial-panel__subtitle {
+  font-size: 0.82rem;
+  color: var(--text-secondary);
+  margin: 4px 0 0;
+  max-width: 620px;
+}
+
+.run-test-btn {
+  background: linear-gradient(135deg, #a855f7, #7e22ce);
+  color: #ffffff;
+  border: none;
+  border-radius: 8px;
+  padding: 10px 18px;
+  font-size: 0.82rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  white-space: nowrap;
+}
+
+.run-test-btn:hover:not(:disabled) {
+  filter: brightness(1.15);
+  box-shadow: 0 0 16px rgba(168, 85, 247, 0.4);
+}
+
+.run-test-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* Resilience Summary Card */
+.resilience-summary-card {
+  display: flex;
+  align-items: center;
+  gap: 28px;
+  flex-wrap: wrap;
+  background: var(--bg-panel-raised);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 20px;
+  margin-bottom: 20px;
+}
+
+.resilience-score-box {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-width: 140px;
+  border-right: 1px solid var(--border);
+  padding-right: 20px;
+}
+
+.resilience-score-val {
+  font-size: 2.2rem;
+  font-weight: 800;
+  color: var(--signal-cyan);
+  font-family: var(--font-mono);
+  letter-spacing: -0.03em;
+}
+
+.resilience-score-label {
+  font-size: 0.72rem;
+  color: var(--text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  margin-top: 2px;
+}
+
+.resilience-stats-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(110px, 1fr));
+  gap: 14px;
+  flex: 1;
+}
+
+.stat-pill {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.stat-num {
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+.stat-desc {
+  font-size: 0.7rem;
+  color: var(--text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.text-safe {
+  color: var(--signal-cyan) !important;
+}
+
+.text-danger {
+  color: #ff5c6c !important;
+}
+
+/* Vulnerability Box */
+.vulnerability-box {
+  background: rgba(168, 85, 247, 0.08);
+  border: 1px solid rgba(168, 85, 247, 0.3);
+  border-radius: 8px;
+  padding: 14px 18px;
+  margin-bottom: 24px;
+}
+
+.vulnerability-title {
+  margin: 0 0 8px;
+  font-size: 0.78rem;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: #d8b4fe;
+}
+
+.vulnerability-list {
+  margin: 0;
+  padding-left: 18px;
+  font-size: 0.82rem;
+  color: #f3e8ff;
+  line-height: 1.5;
+}
+
+.vulnerability-list li {
+  margin-bottom: 4px;
+}
+
+/* Mutations List */
+.mutations-header {
+  font-size: 0.82rem;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--text-secondary);
+  margin: 0 0 12px;
+}
+
+.mutations-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.mutation-card {
+  background: var(--bg-panel-raised);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 14px 18px;
+  transition: border-color 0.15s ease;
+}
+
+.mutation-card.caught {
+  border-left: 4px solid var(--signal-cyan);
+}
+
+.mutation-card.evaded {
+  border-left: 4px solid #ff5c6c;
+}
+
+.mutation-card__top {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 8px;
+}
+
+.mutation-tech-badge {
+  font-size: 0.76rem;
+  font-weight: 600;
+  color: #e2e8f0;
+}
+
+.status-caught {
+  font-family: var(--font-mono);
+  font-size: 0.68rem;
+  font-weight: 700;
+  color: var(--signal-cyan);
+  background: rgba(79, 209, 197, 0.12);
+  padding: 2px 8px;
+  border-radius: 4px;
+}
+
+.status-evaded {
+  font-family: var(--font-mono);
+  font-size: 0.68rem;
+  font-weight: 700;
+  color: #ff5c6c;
+  background: rgba(255, 92, 108, 0.14);
+  padding: 2px 8px;
+  border-radius: 4px;
+}
+
+.mutation-url-box {
+  background: #080c10;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 8px 12px;
+  font-size: 0.82rem;
+  color: var(--text-primary);
+  word-break: break-all;
+  margin-bottom: 8px;
+}
+
+.mutation-desc {
+  margin: 0 0 8px;
+  font-size: 0.78rem;
+  color: var(--text-secondary);
+}
+
+.mutation-factors {
+  display: flex;
+  align-items: baseline;
+  gap: 6px;
+  font-size: 0.72rem;
+}
+
+.factors-label {
+  color: var(--text-secondary);
+  font-weight: 600;
+}
+
+.factors-text {
+  color: #cbd5e1;
+}
+
+.adversarial-empty {
+  text-align: center;
+  padding: 40px 20px;
+  color: var(--text-secondary);
+  font-size: 0.85rem;
+}

@@ -1,0 +1,60 @@
+.signal-breakdown__title {
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--text-secondary);
+  margin: 0 0 14px;
+}
+
+.signal-breakdown__list {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.signal-row__head {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  margin-bottom: 6px;
+}
+
+.signal-row__name {
+  font-size: 0.85rem;
+  color: var(--text-primary);
+}
+
+.signal-row__status {
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
+}
+
+.signal-row__status.is-available {
+  color: var(--signal-cyan);
+}
+
+.signal-row__status.is-unavailable {
+  color: var(--text-secondary);
+}
+
+.signal-row__bar-track {
+  height: 6px;
+  background: var(--bg-panel-raised);
+  border-radius: 999px;
+  overflow: hidden;
+}
+
+.signal-row__bar-fill {
+  height: 100%;
+  background: linear-gradient(90deg, var(--signal-cyan), var(--risk-suspicious));
+  border-radius: 999px;
+  transition: width 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.signal-row__detail {
+  margin: 6px 0 0;
+  font-size: 0.75rem;
+  color: var(--text-secondary);
+  font-style: italic;
+}

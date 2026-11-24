@@ -1,0 +1,188 @@
+.scan-history {
+  margin-top: 10px;
+  background: var(--bg-panel);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 24px;
+}
+
+.scan-history__header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  flex-wrap: wrap;
+  gap: 16px;
+  margin-bottom: 20px;
+}
+
+.history-title-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.scan-history__title {
+  font-size: 1.1rem;
+  margin: 0;
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+.history-count-badge {
+  font-family: var(--font-mono);
+  font-size: 0.68rem;
+  color: var(--signal-cyan);
+  background: rgba(79, 209, 197, 0.12);
+  border: 1px solid rgba(79, 209, 197, 0.35);
+  padding: 3px 8px;
+  border-radius: 999px;
+  font-weight: 500;
+}
+
+.scan-history__subtitle {
+  font-size: 0.82rem;
+  color: var(--text-secondary);
+  margin: 4px 0 0;
+  max-width: 600px;
+}
+
+.history-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.refresh-btn,
+.clear-btn {
+  background: var(--bg-panel-raised);
+  border: 1px solid var(--border);
+  color: var(--text-secondary);
+  border-radius: 6px;
+  padding: 6px 12px;
+  font-size: 0.78rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.refresh-btn:hover {
+  color: var(--signal-cyan);
+  border-color: var(--signal-cyan);
+}
+
+.clear-btn:hover {
+  color: #ff5c6c;
+  border-color: #ff5c6c;
+}
+
+/* History Table */
+.history-table-container {
+  overflow-x: auto;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+}
+
+.history-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.82rem;
+  text-align: left;
+}
+
+.history-table th,
+.history-table td {
+  padding: 10px 14px;
+  border-bottom: 1px solid var(--border);
+}
+
+.history-table th {
+  background: var(--bg-panel-raised);
+  color: var(--text-secondary);
+  font-size: 0.72rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  font-weight: 600;
+}
+
+.history-table tr:hover {
+  background: rgba(255, 255, 255, 0.02);
+}
+
+.history-table tr.active-row {
+  background: rgba(79, 209, 197, 0.05);
+}
+
+.history-verdict-badge {
+  display: inline-block;
+  font-family: var(--font-mono);
+  font-size: 0.68rem;
+  font-weight: 700;
+  padding: 3px 8px;
+  border-radius: 4px;
+  white-space: nowrap;
+}
+
+.history-verdict-badge.risk-high {
+  color: #ff5c6c;
+  background: rgba(255, 92, 108, 0.14);
+}
+
+.history-verdict-badge.risk-suspicious {
+  color: #ffb84d;
+  background: rgba(255, 184, 77, 0.14);
+}
+
+.history-verdict-badge.risk-low {
+  color: var(--signal-cyan);
+  background: rgba(79, 209, 197, 0.12);
+}
+
+.history-url {
+  max-width: 240px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  color: var(--text-primary);
+}
+
+.history-time {
+  font-size: 0.72rem;
+  color: var(--text-secondary);
+  white-space: nowrap;
+}
+
+.history-buttons {
+  display: flex;
+  gap: 6px;
+  white-space: nowrap;
+}
+
+.history-action-btn {
+  background: transparent;
+  border: 1px solid var(--border);
+  color: var(--text-secondary);
+  padding: 4px 8px;
+  border-radius: 4px;
+  font-size: 0.72rem;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.history-action-btn.load:hover {
+  border-color: var(--signal-cyan);
+  color: var(--signal-cyan);
+  background: rgba(79, 209, 197, 0.08);
+}
+
+.history-action-btn.report:hover {
+  border-color: #38bdf8;
+  color: #38bdf8;
+  background: rgba(56, 189, 248, 0.08);
+}
+
+.history-empty {
+  text-align: center;
+  padding: 36px 20px;
+  color: var(--text-secondary);
+  font-size: 0.85rem;
+}

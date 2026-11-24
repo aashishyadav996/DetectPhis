@@ -11,10 +11,12 @@ __pycache__/
 .pytest_cache/
 
 # Local data and logs
+data/
 *.db
 *.sqlite
 *.sqlite3
 *.log
+*_cache.json
 
 # Node
 node_modules/
@@ -24,3 +26,4 @@ dist/
 .DS_Store
 Thumbs.db
 .vscode/
+.idea/

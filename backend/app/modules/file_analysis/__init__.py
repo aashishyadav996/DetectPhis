@@ -1,0 +1,3 @@
+"""
+Generic file analysis module.
+"""
