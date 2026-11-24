@@ -51,10 +51,11 @@ app.config.update(
 )
 
 # This build has no user-account system. Keep it local-only by default and
-# reject requests from non-loopback clients rather than exposing private scan
-# history and destructive history controls on a network interface.
+# reject requests from non-loopback clients unless running in production / Vercel.
 @app.before_request
 def require_local_access():
+    if os.getenv("VERCEL") or os.getenv("APP_ENV", "development").lower() == "production" or os.getenv("ALLOW_REMOTE", "false").lower() == "true":
+        return None
     remote = request.remote_addr
     try:
         is_loopback = bool(remote and ipaddress.ip_address(remote).is_loopback)

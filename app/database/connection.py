@@ -9,8 +9,15 @@ from app.core.config import settings
 from app.database.models import Base
 
 # Ensure local data directory exists for SQLite
-DATA_DIR = Path(__file__).resolve().parent.parent.parent / "data"
-DATA_DIR.mkdir(parents=True, exist_ok=True)
+import os
+if os.getenv("VERCEL"):
+    DATA_DIR = Path("/tmp")
+else:
+    DATA_DIR = Path(__file__).resolve().parent.parent.parent / "data"
+try:
+    DATA_DIR.mkdir(parents=True, exist_ok=True)
+except Exception:
+    pass
 DEFAULT_SQLITE_URL = f"sqlite:///{DATA_DIR / 'phishtrace.db'}"
 
 raw_db_url = settings.database_url or DEFAULT_SQLITE_URL
