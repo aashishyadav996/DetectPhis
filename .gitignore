@@ -18,6 +18,12 @@ data/
 *.log
 *_cache.json
 
+# Archives and backups
+*.zip
+*.tar.gz
+*.rar
+*.7z
+
 # Node
 node_modules/
 dist/

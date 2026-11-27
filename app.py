@@ -51,10 +51,10 @@ app.config.update(
 )
 
 # This build has no user-account system. Keep it local-only by default and
-# reject requests from non-loopback clients unless running in production / Vercel.
+# reject requests from non-loopback clients unless running in cloud / production.
 @app.before_request
 def require_local_access():
-    if os.getenv("VERCEL") or os.getenv("APP_ENV", "development").lower() == "production" or os.getenv("ALLOW_REMOTE", "false").lower() == "true":
+    if os.getenv("RENDER") or os.getenv("VERCEL") or os.getenv("APP_ENV", "development").lower() == "production" or os.getenv("ALLOW_REMOTE", "false").lower() == "true":
         return None
     remote = request.remote_addr
     try:
@@ -389,10 +389,12 @@ if __name__ == "__main__":
     port = int(os.getenv("PORT", 5000))
     host = os.getenv("HOST", "127.0.0.1")
     if host not in {"127.0.0.1", "localhost", "::1"}:
-        raise SystemExit(
-            "Refusing remote binding: this build has no user authentication. "
-            "Keep HOST on 127.0.0.1 until an authenticated deployment is configured."
-        )
+        is_cloud = bool(os.getenv("RENDER") or os.getenv("VERCEL") or os.getenv("APP_ENV", "development").lower() == "production" or os.getenv("ALLOW_REMOTE", "false").lower() == "true")
+        if not is_cloud:
+            raise SystemExit(
+                "Refusing remote binding: this build has no user authentication. "
+                "Keep HOST on 127.0.0.1 until an authenticated deployment is configured."
+            )
     print(f"\n=======================================================")
     print(f" PhishTrace AI running at: http://127.0.0.1:{port}")
     print(f" Local-only mode; debug is disabled.")
